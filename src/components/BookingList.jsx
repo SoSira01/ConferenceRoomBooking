@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDatabase, ref, onValue, remove } from 'firebase/database';
 import app from '../firebaseConfig'; 
+import Swal from 'sweetalert2';
 
 const db = getDatabase(app);
 
@@ -48,8 +49,25 @@ const BookingList = ({ refresh }) => {
 
   const handleDelete = async (id) => {
     const bookingRef = ref(db, `bookings/${id}`);
-    await remove(bookingRef);
-    alert('Booking deleted successfully!');
+    await Swal.fire({
+      title: 'Delete booking',
+      text: 'Are you sure you want to delete this booking?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'Cancel',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await remove(bookingRef);
+        
+        // Update the local state after deletion
+        const updatedBookings = bookings.filter(booking => booking.id !== id);
+        setBookings(updatedBookings);
+        setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
+      }
+    });
+    //await remove(bookingRef);
+    Swal.fire('Success', 'Booking deleted successfully!', 'success');
     
     // Update the local state after deletion
     const updatedBookings = bookings.filter(booking => booking.id !== id);
