@@ -12,11 +12,11 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 p-4 flex flex-col md:flex-row" data-theme="cupcake">
-      <div className="p-2">
+    <div className="min-h-screen p-4 flex flex-col md:flex-row" data-theme="cupcake">
+      <div className="md:flex-1 p-2">
         <BookingForm onBookingSuccess={handleBookingSuccess} />
       </div>
-      <div className="p-2">
+      <div className="md:flex-1 p-2">
         <BookingList refresh={refresh} />
       </div>
     </div>
