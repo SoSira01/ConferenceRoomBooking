@@ -16,11 +16,14 @@ const BookingList = ({ refresh }) => {
       const data = snapshot.val();
       if (data) {
         const bookingsArray = Object.entries(data).map(([id, booking]) => ({
-          id, // Add id to each booking
+          id,
           ...booking,
         }));
         setBookings(bookingsArray);
         setFilteredBookings(bookingsArray);
+      } else {
+        setBookings([]); // Reset bookings if no data is found
+        setFilteredBookings([]);
       }
     });
   }, [refresh]);
@@ -47,6 +50,11 @@ const BookingList = ({ refresh }) => {
     const bookingRef = ref(db, `bookings/${id}`);
     await remove(bookingRef);
     alert('Booking deleted successfully!');
+    
+    // Update the local state after deletion
+    const updatedBookings = bookings.filter(booking => booking.id !== id);
+    setBookings(updatedBookings);
+    setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
   };
 
   return (
