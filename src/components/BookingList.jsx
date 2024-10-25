@@ -3,13 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { getDatabase, ref, onValue, remove } from 'firebase/database';
 import app from '../firebaseConfig'; 
 import Swal from 'sweetalert2';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment'; // Import moment
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment); // Use moment here instead of require
 
 const db = getDatabase(app);
 
 const BookingList = ({ refresh }) => {
   const [bookings, setBookings] = useState([]);
-  const [filteredBookings, setFilteredBookings] = useState([]);
-  const [filterDate, setFilterDate] = useState('');
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     const bookingsRef = ref(db, 'bookings/');
@@ -18,34 +22,19 @@ const BookingList = ({ refresh }) => {
       if (data) {
         const bookingsArray = Object.entries(data).map(([id, booking]) => ({
           id,
-          ...booking,
+          title: booking.bookedBy, // Event title
+          start: moment(booking.date + 'T' + booking.timeSlot).toDate(), // Combine date and time for start
+          end: moment(booking.date + 'T' + booking.timeSlot).toDate(), // Use the same time for end or adjust as needed
+          allDay: true, // Set to true if it's an all-day event
         }));
         setBookings(bookingsArray);
-        setFilteredBookings(bookingsArray);
+        setEvents(bookingsArray);
       } else {
         setBookings([]); // Reset bookings if no data is found
-        setFilteredBookings([]);
+        setEvents([]);
       }
     });
   }, [refresh]);
-
-  useEffect(() => {
-    // Set today's date as the default filter date
-    const today = new Date().toISOString().split('T')[0];
-    setFilterDate(today);
-  }, []);
-
-  const handleFilterChange = (e) => {
-    const selectedDate = e.target.value;
-    setFilterDate(selectedDate);
-
-    if (selectedDate) {
-      const filtered = bookings.filter(booking => booking.date === selectedDate);
-      setFilteredBookings(filtered);
-    } else {
-      setFilteredBookings(bookings);
-    }
-  };
 
   const handleDelete = async (id) => {
     const bookingRef = ref(db, `bookings/${id}`);
@@ -68,41 +57,46 @@ const BookingList = ({ refresh }) => {
       // Update the local state after deletion
       const updatedBookings = bookings.filter(booking => booking.id !== id);
       setBookings(updatedBookings);
-      setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
+      setEvents(updatedBookings.map((booking) => ({
+        id: booking.id,
+        title: booking.bookedBy,
+        start: moment(booking.date + 'T' + booking.timeSlot).toDate(),
+        end: moment(booking.date + 'T' + booking.timeSlot).toDate(),
+        allDay: true,
+      })));
     }
-  
+  };
+
+  const eventStyleGetter = (event) => {
+    const backgroundColor = '#ffcccc'; // Change color as needed
+    const style = {
+      backgroundColor,
+      borderRadius: '5px',
+      opacity: 0.8,
+      color: 'black',
+      border: '0',
+      display: 'block',
+    };
+    return {
+      style,
+    };
   };
 
   return (
     <div className="bg-white p-4 rounded shadow-lg">
       <h2 className="text-xl font-bold mb-4">Current Bookings</h2>
-      <input
-        type="date"
-        value={filterDate}
-        onChange={handleFilterChange}
-        className="input input-bordered w-full mb-4"
-      />
-      <div className="grid grid-cols-1 gap-4">
-        {filteredBookings.length > 0 ? (
-          filteredBookings.map((booking) => (
-            <div key={booking.id} className="card bg-base-100 shadow-md">
-              <div className="card-body">
-                <p><strong>Date:</strong> {booking.date}</p>
-                <p><strong>Time Slot:</strong> {booking.timeSlot}</p>
-                <p><strong>Booked By:</strong> {booking.bookedBy}</p>
-                <button 
-                  onClick={() => handleDelete(booking.id)}
-                  className="btn btn-danger mt-2"
-                >
-                  Delete Booking
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-center">No bookings found for this date.</p>
-        )}
+      <div style={{ height: '500px' }}>
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 500 }}
+          eventPropGetter={eventStyleGetter}
+          onSelectEvent={(event) => handleDelete(event.id)} // Deleting by clicking on event
+        />
       </div>
+      {events.length === 0 && <p className="text-center">No bookings found.</p>}
     </div>
   );
 };
