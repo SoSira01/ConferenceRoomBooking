@@ -49,30 +49,28 @@ const BookingList = ({ refresh }) => {
 
   const handleDelete = async (id) => {
     const bookingRef = ref(db, `bookings/${id}`);
-    await Swal.fire({
+    
+    // Display the confirmation dialog
+    const result = await Swal.fire({
       title: 'Delete booking',
       text: 'Are you sure you want to delete this booking?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes',
       cancelButtonText: 'Cancel',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        await remove(bookingRef);
-        
-        // Update the local state after deletion
-        const updatedBookings = bookings.filter(booking => booking.id !== id);
-        setBookings(updatedBookings);
-        setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
-      }
     });
-    //await remove(bookingRef);
-    Swal.fire('Success', 'Booking deleted successfully!', 'success');
-    
-    // Update the local state after deletion
-    const updatedBookings = bookings.filter(booking => booking.id !== id);
-    setBookings(updatedBookings);
-    setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
+  
+    // Only proceed with deletion if the user confirms
+    if (result.isConfirmed) {
+      await remove(bookingRef);
+      Swal.fire('Success', 'Booking deleted successfully!', 'success');
+      
+      // Update the local state after deletion
+      const updatedBookings = bookings.filter(booking => booking.id !== id);
+      setBookings(updatedBookings);
+      setFilteredBookings(updatedBookings.filter(booking => booking.date === filterDate));
+    }
+  
   };
 
   return (
