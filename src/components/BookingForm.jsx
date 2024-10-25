@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, set, onValue } from 'firebase/database';
 import app from '../firebaseConfig';
+import Swal from 'sweetalert2';
 
 const db = getDatabase(app);
 
@@ -38,7 +39,7 @@ const BookingForm = ({ onBookingSuccess }) => {
 
     if (date && bookedBy && startTime && endTime) {
       if (startTime >= endTime) {
-        alert('End time must be after start time.');
+        Swal.fire('Error', 'End time must be after start time.', 'error');
         return;
       }
 
@@ -63,7 +64,7 @@ const BookingForm = ({ onBookingSuccess }) => {
       }
 
       if (isOverlapping) {
-        alert('The selected time slot overlaps with an existing booking.');
+        Swal.fire('Error', 'The selected time slot overlaps with an existing booking.', 'error');
         return;
       }
 
@@ -73,7 +74,7 @@ const BookingForm = ({ onBookingSuccess }) => {
         timeSlot: `${startTime}-${endTime}`,
         bookedBy,
       });
-      alert('Booking successful!');
+      Swal.fire('Success', 'Booking successful!', 'success');
       setDate('');
       setStartTime('');
       setEndTime('');
