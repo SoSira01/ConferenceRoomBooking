@@ -1,4 +1,3 @@
-// src/components/BookingList.jsx
 import React, { useEffect, useState } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../firebaseConfig';
@@ -16,22 +15,20 @@ const BookingList = () => {
       if (data) {
         const bookingsArray = Object.values(data);
         setBookings(bookingsArray);
-        setFilteredBookings(bookingsArray); // Set filtered bookings initially
+        setFilteredBookings(bookingsArray);
       }
     });
   }, []);
 
-  // Handle date change from the calendar
   const handleDateChange = (date) => {
-    const selectedDate = date.toISOString().split('T')[0]; // Get the date in YYYY-MM-DD format
+    const selectedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
     setFilterDate(selectedDate);
 
-    // Filter bookings based on the selected date
     if (selectedDate) {
       const filtered = bookings.filter(booking => booking.date === selectedDate);
       setFilteredBookings(filtered);
     } else {
-      setFilteredBookings(bookings); // Reset to all bookings if no date is selected
+      setFilteredBookings(bookings);
     }
   };
 

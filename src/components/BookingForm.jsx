@@ -1,4 +1,3 @@
-// src/components/BookingForm.jsx
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, set, onValue } from 'firebase/database';
 import app from '../firebaseConfig';
