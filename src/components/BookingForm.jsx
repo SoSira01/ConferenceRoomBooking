@@ -84,7 +84,7 @@ const BookingForm = ({ onBookingSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-lg">
-      <h2 className="text-lg font-bold mb-4">Book Meeting Room</h2>
+      <h2 className="text-lg font-bold mb-4">🎁 Book Meeting Room</h2>
       <input 
         type="date" 
         value={date} 
